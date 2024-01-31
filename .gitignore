@@ -1,0 +1,19 @@
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# .Ds_Store
+.Ds_Store
+
+# Byte-compiled
+__pycache__
+# PyCharm
+.idea/
+
+# Distribution / packaging
+.eggs/
+build/
+dist/
+*.egg-info/
+
+# virtualenv
+venv/
