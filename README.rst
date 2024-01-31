@@ -67,6 +67,7 @@ For example, load the local dataset ``BACH`` in frame of AnnData as
 For example, train RETINA dataset as
 
 .. code-block:: python
+
     n_epochs = 400 # given number of epochs
     lr = 0.001 # given learning rate
     use_cuda = True # whether use gpu or not
@@ -84,6 +85,7 @@ For example, train RETINA dataset as
 3. Get Embedding and labels predicted
 
 .. code-block:: python
+
     import numpy as np
     full = ctrainer.create_posterior(ctrainer.model, retina_dataset, indices=np.arange(len(retina_dataset)))
     full = full.update({"batch_size":32})
