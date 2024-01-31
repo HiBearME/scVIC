@@ -4,7 +4,7 @@ scVIC - Deep generative modeling of heterogeneity for scRNA-seq data
 
 scVIC is a package for generative modeling heterogeneity for scRNA-seq data, implemented by Pytorch.
 
-.. image:: https://raw.githubusercontent.com/HiBearME/scVIC/master/figures/Overview.pdf
+.. image:: https://raw.githubusercontent.com/HiBearME/scVIC/master/figures/Overview.png
     :alt: Overview of scVIC
 
 ------------
@@ -22,7 +22,7 @@ Installation
 .. code-block:: bash
 
     git clone git://github.com/HiBearME/scVIC.git
-    cd NeuralEE
+    cd scVIC
     python setup.py install --user
 
 ----------------
@@ -63,6 +63,7 @@ For example, load the local dataset ``BACH`` in frame of AnnData as
     bach_dataset.load_dataset_from_scVI(gene_dataset)
 
 2. Train
+
 For example, train RETINA dataset as
 
 .. code-block:: python
