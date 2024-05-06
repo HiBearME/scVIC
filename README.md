@@ -99,5 +99,5 @@ latent, labels_pred = full.sequential().get_latent()
 
 ## Reproducibility
 
-To reproduce the results of original manuscript, please check in `repoducibility/notebooks`.
+To reproduce the results of original manuscript, please check in `notebooks/repoducibility`.
 

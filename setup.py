@@ -7,7 +7,7 @@ with open('README.rst') as readme_file:
     readme = readme_file.read()
 
 requirements = [
-    "scanpy<=1.7.2",
+    "scanpy~=1.8.1",
     "numpy<=1.17.0",
     "torch<=2.0",
     "matplotlib<=3.4",
@@ -24,7 +24,8 @@ requirements = [
     "scikit-misc",
     "seaborn<=0.11.2",
     "numba<=0.51.2",
-    "importlib-metadata<=4.8.1 "
+    "importlib-metadata<=4.8.1",
+    "umap-learn~=0.3.10"
 ]
 
 setup_requirements = ['pytest-runner', ]
