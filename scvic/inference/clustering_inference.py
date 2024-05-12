@@ -7,7 +7,7 @@ from scvi.models.utils import one_hot
 from scvi.inference.posterior import plot_imputation
 import numpy as np
 import torch
-from typing import List, Optional, Union, Tuple
+from typing import List, Optional, Union, Tuple, Iterable
 import logging
 import time
 import pandas as pd
@@ -303,34 +303,16 @@ class CPosterior(Posterior):
     @torch.no_grad()
     def standard_scale_sampler(
             self,
-            n_samples: Optional[int] = 5000,
-            batch_sampler: str = "prior",
-            cluster_sampler: str = "posterior"
+            n_samples_total,
+            p_batch,
+            p_cluster,
     ) -> dict:
-
-        batchid = range(self.gene_dataset.n_batches)
-        if batch_sampler is "prior":
-            counts = np.zeros(self.gene_dataset.n_batches)
-            for batch in batchid:
-                counts[batch] = sum(self.gene_dataset.batch_indices == batch)
-            p_batch = np.array(counts) / sum(counts)
-        elif batch_sampler is "uniform":
-            p_batch = np.ones(self.gene_dataset.n_batches) / self.gene_dataset.n_batches
-        else:
-            raise NotImplementedError()
-
-        samples_for_each_batch = (n_samples * p_batch / p_batch.max()).astype(int)
-
-        if cluster_sampler is "posterior":
-            p_cluster = self.model.pi.squeeze().cpu().detach().numpy()
-        elif cluster_sampler is "uniform":
-            p_cluster = np.ones(self.gene_dataset.n_labels) / self.gene_dataset.n_labels
-        else:
-            raise NotImplementedError()
 
         scales_for_each_batch = []
         clusters_for_each_batch = []
 
+        batchid = range(self.gene_dataset.n_batches)
+        samples_for_each_batch = (n_samples_total * p_batch).astype(int)
         for batch_idx in batchid:
             samples_for_each_cluster = (samples_for_each_batch[batch_idx] * p_cluster).astype(int)
             cluster_index = [
@@ -355,24 +337,44 @@ class CPosterior(Posterior):
     @torch.no_grad()
     def bayes_factors(
             self,
-            n_samples: Optional[int] = 5000,
+            n_samples: Optional[int] = 500,
             batch_sampler: str = "prior",
             cluster_sampler: str = "posterior"
     ):
 
         eps = 1e-8
-        sampler = self.standard_scale_sampler(n_samples, batch_sampler, cluster_sampler)
-        scales_for_all_batch = sampler["scales"]
-        labels_for_all_batch = sampler["labels"]
+
+        batchid = range(self.gene_dataset.n_batches)
+        if batch_sampler is "prior":
+            counts = np.zeros(self.gene_dataset.n_batches)
+            for batch in batchid:
+                counts[batch] = sum(self.gene_dataset.batch_indices == batch)
+            p_batch = np.array(counts) / sum(counts)
+        elif batch_sampler is "uniform":
+            p_batch = np.ones(self.gene_dataset.n_batches) / self.gene_dataset.n_batches
+        else:
+            raise NotImplementedError()
+
+        if cluster_sampler is "posterior":
+            p_cluster = self.model.pi.squeeze().cpu().detach().numpy()
+        elif cluster_sampler is "uniform":
+            p_cluster = np.ones(self.gene_dataset.n_labels) / self.gene_dataset.n_labels
+        else:
+            raise NotImplementedError()
+
         bayes_factors = []
         for label in np.arange(self.gene_dataset.n_labels):
+            n_samples_total = (n_samples / p_cluster[label]).astype(int)
+            sampler = self.standard_scale_sampler(n_samples_total, p_batch, p_cluster)
+            scales_for_all_batch = sampler["scales"]
+            labels_for_all_batch = sampler["labels"]
             counts = 0
             over = 0
             for batch in np.arange(self.gene_dataset.n_batches):
                 scales = scales_for_all_batch[batch]
                 labels = labels_for_all_batch[batch].squeeze()
                 scales_for_the_label = scales[labels == label]
-                indices = torch.randperm(scales_for_the_label.size(0))
+                indices = torch.randperm(scales.size(0)-scales_for_the_label.size(0))[:scales_for_the_label.size(0)]
                 scales_not_for_the_label = scales[labels != label][indices, :]
                 counts = counts + scales_for_the_label.size(0)
                 over = over + (scales_for_the_label > scales_not_for_the_label).sum(dim=0).cpu().numpy()
@@ -399,12 +401,31 @@ class CPosterior(Posterior):
         calibration = []
         for tensors in self:
             sample_batch, local_l_mean, local_l_var, batch_index, labels = tensors
-            px_rate = self.model.get_sample_scale(
+            px_rate = self.model.get_sample_rate(
                 sample_batch, batch_index=batch_index, n_samples=n_samples, transform_batch=transform_batch
             )
             calibration += [px_rate.cpu()]
 
         return np.array(torch.cat(calibration))
+
+    @torch.no_grad()
+    def denoised_scale(self, transform_batch: Union[None, int, str] = "max", n_samples: int = 1):
+        if transform_batch is "max":
+            batchid = range(self.gene_dataset.n_batches)
+            counts = np.zeros(self.gene_dataset.n_batches)
+            for batch in batchid:
+                counts[batch] = sum(self.gene_dataset.batch_indices == batch)
+            transform_batch = counts.argmax()
+
+        denoised_scale = []
+        for tensors in self:
+            sample_batch, local_l_mean, local_l_var, batch_index, labels = tensors
+            px_scale = self.model.get_sample_scale(
+                sample_batch, batch_index=batch_index, n_samples=n_samples, transform_batch=transform_batch
+            )
+            denoised_scale += [px_scale.cpu()]
+
+        return np.array(torch.cat(denoised_scale))
 
     def sequential(self, batch_size: Optional[int] = 1024) -> "CPosterior":
         """Returns a copy of the object that iterate over the data sequentially.
