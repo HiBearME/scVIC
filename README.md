@@ -113,3 +113,7 @@ latent, labels_pred = full.sequential().get_latent()
 
 Since the Python version and dependency environment have changed in this branch, reproducibility is not guaranteed. If you wish to reproduce the results of the original manuscript, please switch to the **master** branch.
 
+## Citation
+
+Jiankang Xiong, Fuzhou Gong, Liang Ma and Lin Wan. "scVIC: deep generative modeling of heterogeneity for scRNA-seq data." Bioinformatics Advances (2024): vbae086, https://doi.org/10.1093/bioadv/vbae086 .
+
