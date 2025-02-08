@@ -3,34 +3,8 @@
 
 from setuptools import setup, find_packages
 
-with open('README.rst') as readme_file:
-    readme = readme_file.read()
-
-requirements = [
-    "scanpy~=1.8.1",
-    "numpy~=1.19",
-    "torch<=2.0",
-    "matplotlib<=3.4",
-    "scikit-learn<=0.22.2",
-    "h5py~=3.8.0",
-    "pandas~=1.3.5",
-    "loompy<=3.0.6",
-    "tqdm<=4.31.1",
-    "xlrd~=2.0.1",
-    "hyperopt==0.1.2",
-    "anndata<=0.7.4",
-    "statsmodels",
-    'dataclasses; python_version > "3.7"',  # for `dataclass`
-    "scikit-misc",
-    "seaborn<=0.11.2",
-    "numba<=0.51.2",
-    "importlib-metadata<=4.8.1",
-    "umap-learn~=0.3.10"
-]
-
-setup_requirements = ['pytest-runner', ]
-
-test_requirements = ['pytest', ]
+with open('requirements.txt') as f:
+    requirements = f.readlines()
 
 setup(
     author='Jiankang Xiong',
@@ -49,15 +23,8 @@ setup(
                 "of heterogeneity for scRNA-seq data",
     install_requires=requirements,
     license="MIT license",
-    long_description=readme,
-    include_package_data=True,
-    keywords='scvic',
     name='scvic',
     packages=find_packages(),
-    setup_requires=setup_requirements,
-    test_suite='tests',
-    tests_require=test_requirements,
     url='https://github.com/HibearME/scVIC',
-    version='1.0',
-    zip_safe=False,
+    version='1.0.1'
 )

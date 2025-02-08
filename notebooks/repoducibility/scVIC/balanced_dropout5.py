@@ -43,7 +43,7 @@ from sklearn.metrics import adjusted_rand_score, normalized_mutual_info_score
 from scvic.utils import cluster_acc
 
 
-n_epochs = 400
+n_epochs = 800
 lr = 1e-2
 use_cuda = True
 n_gene_highly_variable = 500

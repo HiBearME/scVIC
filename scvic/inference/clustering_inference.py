@@ -409,7 +409,7 @@ class CPosterior(Posterior):
         return np.array(torch.cat(calibration))
 
     @torch.no_grad()
-    def denoised_scale(self, transform_batch: Union[None, int, str] = "max", n_samples: int = 1):
+    def registration(self, transform_batch: Union[None, int, str] = "max", n_samples: int = 1):
         if transform_batch is "max":
             batchid = range(self.gene_dataset.n_batches)
             counts = np.zeros(self.gene_dataset.n_batches)

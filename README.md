@@ -1,31 +1,34 @@
-# scVIC - Deep generative modeling of heterogeneity for scRNA-seq data
+# scVIC - Deep Generative Modeling of Heterogeneity for scRNA-seq Data
 
-scVIC is a package for generative modeling heterogeneity for scRNA-seq data, implemented by Pytorch.
+**scVIC** is a package for generative modeling heterogeneity for scRNA-seq data, implemented in **PyTorch**.
 
 ![Overview of scVIC](https://raw.githubusercontent.com/HiBearME/scVIC/master/figures/Overview.png "Overview of scVIC")
 ## Installation
 
-1. Install Python 3.7.
+1. Install **Conda** and create a virtual environment with `python==3.7`:
 
-2. Install `PyTorch <https://pytorch.org>`_. If you have an NVIDIA GPU, be sure
-   to install a version of PyTorch that supports it. scVIC runs much faster
-   with GPUs.
+   ```bash
+   conda create -n scVIC python==3.7
+   conda activate scVIC
+   ```
+
+2. Install [PyTorch](https://pytorch.org) in the virtual environment. If you have an **NVIDIA GPU**, make sure to install a version of PyTorch that supports it. PyTorch performs much faster with an NVIDIA GPU. For maximum compatibility, we currently recommend installing `pytorch==1.12.1`.
 
 3. Install scVIC from GitHub:
 
-```bash
-git clone git://github.com/HiBearME/scVIC.git
-cd scVIC
-python setup.py install --user
-```
+   ```bash
+   git clone git://github.com/HiBearME/scVIC.git
+   cd scVIC
+   pip install .
+   ```
 
 
-## How to use scVIC
+## Usage
 1. Load Data
 
-Our datasets loading and preprocessing module is based on scVI.
-For datasets available in scVI, users can directly obtain it through Python code.
-For example, load the online dataset ``RETINA`` available in scVI as
+scVIC utilizes **scVI** for dataset loading and preprocessing. If your dataset is available in scVI, you can directly retrieve it.  
+
+For example, to load the **RETINA** dataset from scVI:
 
 ```python
 from scvi.dataset import RetinaDataset
@@ -39,15 +42,16 @@ retina_dataset = ExpressionDataset()
 retina_dataset.load_dataset_from_scVI(gene_dataset)
 ```
 
-For datasets more generic as AnnData, users can transform it into data frame in scVI.
-For example, load the local dataset ``BACH`` in frame of AnnData as
+For **AnnData**-formatted datasets, you can convert them to a scVI-compatible format.  
+
+For example, to load the **BACH** dataset in format of **AnnData**:
 
 ```python
 from scvi.dataset import AnnDatasetFromAnnData
 from scvic.dataset import ExpressionDataset
 import scanpy as sc
-adata = sc.AnnData(X) # X is the expression matrix of the BACH dataset.
-adata.obs['cell_types'] = cell_types # cell_types is the types vector of the BACH dataset.
+adata = sc.AnnData(X) # X: Expression matrix of the BACH dataset.
+adata.obs['cell_types'] = cell_types # cell_types: Cell type labels.
 gene_dataset = AnnDatasetFromAnnData(adata)
 gene_dataset.subsample_genes(1000)
 gene_dataset.make_gene_names_lower()
@@ -57,22 +61,30 @@ bach_dataset.load_dataset_from_scVI(gene_dataset)
 
 2. Train
 
-For example, train RETINA dataset as (the meaning of parameters showed as comments)
+For example, train scVIC on **RETINA** dataset:
 
 ```python
-n_epochs = 400 # given number of epochs (Default as scVI)
-lr = 0.001 # given learning rate (Default as scVI)
-use_cuda = True # whether use gpu or not
-use_batches = True # whether remove batch effects or not
+from scvic.models import CVAE
+from scvic.inference import CTrainer
 
-# Initialize scVIC model by CVAE class using dateset info: the number of genes, cell types, and batches.
-# If without batch effect removal, please set use_batches as False.
-# n_latent denotes the dimensionality of latent variable (Default as scVI)
-retina_cvae = CVAE(retina_dataset.nb_genes, n_labels=retina_dataset.n_labels, n_batch=retina_dataset.n_batches * use_batches, n_latent=10)
+# Define training parameters
+n_epochs = 400 # Number of training epochs (default: 400, same as scVI)
+lr = 0.001 # Learning rate (default: 0.001, same as scVI)
+use_cuda = True # Enable GPU acceleration
+use_batches = True # Take batch effects into account (set to False to disable)
 
-# Initialize train setup of scVIC by CTrainer class using initialized scVIC model and RNA-seq datasets.
-# train_size is the proportion of train dataset. (Default as using all samples)
-# n_epochs_pre_train and n_epochs_kl_warmup is the computational trick of neural networks. (Half of epoches as default)
+# Initialize the scVIC model using dataset information: the number of genes, cell types, and batches.
+# If batch effect removal is not needed, set use_batches to False.
+# n_latent denotes the dimensionality of the latent variable (default: 10, same as scVI)
+retina_cvae = CVAE(
+   retina_dataset.nb_genes, 
+   n_labels=retina_dataset.n_labels,
+   n_batch=retina_dataset.n_batches * use_batches, 
+   n_latent=10)
+
+# Set up the training process using CTrainer with the initialized scVIC model and RNA-seq dataset.
+# train_size defines the proportion of the dataset used for training (default: 100%)
+# n_epochs_pre_train and n_epochs_kl_warmup help stabilize training (default: half of total epochs)
 ctrainer = CTrainer(
     retina_cvae,
     retina_dataset,
@@ -81,19 +93,19 @@ ctrainer = CTrainer(
     n_epochs_kl_warmup=200,
     n_epochs_pre_train=200)
 
-# Actual train by train function of CTrainer class.
+# Train the model
 ctrainer.train(n_epochs=n_epochs, lr=lr)
 ```
-3. Get Embedding and labels predicted (the meaning of parameters showed as comments)
+3. Get Embedding and Predicted Labels
 
 ```python
 import numpy as np
 
-# Inference of scVIC by Posterior class, using create_posterior function of CTrainer class given scVIC model and dataset.
+# Create posterior inference object
 full = ctrainer.create_posterior(ctrainer.model, retina_dataset, indices=np.arange(len(retina_dataset)))
-# reset inference batch size (Optional, not reset is total fine)
+# Optionally, update batch size for inference
 full = full.update({"batch_size":32})
-# Complete inference by get_latent function of  Posterior class.
+# Perform inference
 latent, labels_pred = full.sequential().get_latent()
 ```
 
