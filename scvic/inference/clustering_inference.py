@@ -149,7 +149,7 @@ class CPosterior(Posterior):
         original_list = []
         imputed_list = []
         batch_size = 10000  # self.data_loader_kwargs["batch_size"] // n_samples
-        if situation is "corrupted":
+        if situation == "corrupted":
             for tensors, corrupted_tensors in zip(
                     self.uncorrupted().sequential(batch_size=batch_size),
                     self.corrupted().sequential(batch_size=batch_size),
@@ -184,7 +184,7 @@ class CPosterior(Posterior):
                     original_list = np.array([])
                     imputed_list = np.array([])
             return original_list, imputed_list
-        elif situation is "dropout removal":
+        elif situation == "dropout removal":
             for tensors_dropout_removal, tensors_dropout_not_removal in zip(
                     self.dropout_not_removal().sequential(batch_size=batch_size),
                     self.dropout_removal().sequential(batch_size=batch_size),
@@ -345,19 +345,19 @@ class CPosterior(Posterior):
         eps = 1e-8
 
         batchid = range(self.gene_dataset.n_batches)
-        if batch_sampler is "prior":
+        if batch_sampler == "prior":
             counts = np.zeros(self.gene_dataset.n_batches)
             for batch in batchid:
                 counts[batch] = sum(self.gene_dataset.batch_indices == batch)
             p_batch = np.array(counts) / sum(counts)
-        elif batch_sampler is "uniform":
+        elif batch_sampler == "uniform":
             p_batch = np.ones(self.gene_dataset.n_batches) / self.gene_dataset.n_batches
         else:
             raise NotImplementedError()
 
-        if cluster_sampler is "posterior":
+        if cluster_sampler == "posterior":
             p_cluster = self.model.pi.squeeze().cpu().detach().numpy()
-        elif cluster_sampler is "uniform":
+        elif cluster_sampler == "uniform":
             p_cluster = np.ones(self.gene_dataset.n_labels) / self.gene_dataset.n_labels
         else:
             raise NotImplementedError()
@@ -391,7 +391,7 @@ class CPosterior(Posterior):
 
     @torch.no_grad()
     def calibration(self, transform_batch: Union[None, int, str] = "max", n_samples: int = 1):
-        if transform_batch is "max":
+        if transform_batch == "max":
             batchid = range(self.gene_dataset.n_batches)
             counts = np.zeros(self.gene_dataset.n_batches)
             for batch in batchid:
@@ -410,7 +410,7 @@ class CPosterior(Posterior):
 
     @torch.no_grad()
     def registration(self, transform_batch: Union[None, int, str] = "max", n_samples: int = 1):
-        if transform_batch is "max":
+        if transform_batch == "max":
             batchid = range(self.gene_dataset.n_batches)
             counts = np.zeros(self.gene_dataset.n_batches)
             for batch in batchid:

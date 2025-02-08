@@ -113,3 +113,11 @@ latent, labels_pred = full.sequential().get_latent()
 
 To reproduce the results of original manuscript, please check in `notebooks/repoducibility`.
 
+
+## Variant
+
+If you wish to use scVIC with Python 3.9, please switch to the **python3.9** branch. However, since the Python version and dependency environment have changed in this branch, reproducibility is not guaranteed.
+
+## Citation
+
+Jiankang Xiong, Fuzhou Gong, Liang Ma and Lin Wan. "scVIC: deep generative modeling of heterogeneity for scRNA-seq data." Bioinformatics Advances (2024): vbae086, https://doi.org/10.1093/bioadv/vbae086 .
