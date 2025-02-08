@@ -13,7 +13,7 @@ setup(
         'Development Status :: 4 - Beta',
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.9',
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: Microsoft :: Windows',
         'Operating System :: POSIX :: Linux',
@@ -26,5 +26,5 @@ setup(
     name='scvic',
     packages=find_packages(),
     url='https://github.com/HibearME/scVIC',
-    version='1.0.1'
+    version='1.0.1.variant.3.9'
 )

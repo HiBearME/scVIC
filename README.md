@@ -5,10 +5,10 @@
 ![Overview of scVIC](https://raw.githubusercontent.com/HiBearME/scVIC/master/figures/Overview.png "Overview of scVIC")
 ## Installation
 
-1. Install **Conda** and create a virtual environment with `python==3.7`:
+1. Install **Conda** and create a virtual environment with `python==3.9`:
 
    ```bash
-   conda create -n scVIC python==3.7
+   conda create -n scVIC python==3.9
    conda activate scVIC
    ```
 
@@ -111,5 +111,5 @@ latent, labels_pred = full.sequential().get_latent()
 
 ## Reproducibility
 
-To reproduce the results of original manuscript, please check in `notebooks/repoducibility`.
+Since the Python version and dependency environment have changed in this branch, reproducibility is not guaranteed. If you wish to reproduce the results of the original manuscript, please switch to the **master** branch.
 
