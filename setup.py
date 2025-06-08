@@ -26,5 +26,5 @@ setup(
     name='scvic',
     packages=find_packages(),
     url='https://github.com/HibearME/scVIC',
-    version='1.0.1.variant.3.9'
+    version='1.0.2.variant.3.9'
 )
